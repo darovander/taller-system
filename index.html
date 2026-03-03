@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #fcfcfc;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-pizza {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-pizza:active {
+            transform: scale(0.95);
+        }
+
+        .btn-grad {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+        }
+    </style>
+</head>
+
+<body class="pb-32">
+
+    <div class="relative h-64 bg-slate-900 flex items-center justify-center text-center text-white overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800"
+            class="absolute inset-0 w-full h-full object-cover opacity-40">
+        <div class="relative z-10 px-4">
+            <h1 id="pizzeria-nombre" class="text-4xl font-800 tracking-tight">Cargando...</h1>
+            <p class="text-orange-300 font-semibold tracking-widest uppercase text-xs mt-2">Artesanal & Calentito</p>
+        </div>
+    </div>
+
+    <div id="banner-cerrado"
+        class="bg-red-600 text-white text-center py-2 text-sm font-bold hidden shadow-md relative z-20">
+        <i class="fas fa-store-slash mr-2"></i> Cerrado en este momento. Podés mirar el menú pero no tomar pedidos.
+    </div>
+
+    <div class="sticky top-0 z-30 glass py-4 px-4 border-b border-gray-100 flex items-center gap-2">
+        <div class="flex gap-2 overflow-x-auto no-scrollbar w-full">
+            <button onclick="filtrar('todas')"
+                class="cat-btn bg-orange-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-md">Todas</button>
+            <button onclick="filtrar('promos')"
+                class="cat-btn bg-white text-gray-500 px-5 py-2 rounded-full text-sm font-bold border border-gray-100">🔥
+                Promos</button>
+            <button onclick="filtrar('clasicas')"
+                class="cat-btn bg-white text-gray-500 px-5 py-2 rounded-full text-sm font-bold border border-gray-100">Clásicas</button>
+        </div>
+    </div>
+
+    <div id="grid-productos" class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+    </div>
+
+    <div id="cart-bar"
+        class="fixed bottom-6 left-4 right-4 max-w-lg mx-auto bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center hidden z-50 animate-bounce-short">
+        <div>
+            <span id="cart-count"
+                class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full mr-2">0</span>
+            <span class="text-sm font-semibold text-gray-300">Total:</span>
+            <span id="cart-total" class="text-xl font-bold ml-1 text-orange-400">$0</span>
+        </div>
+        <button id="btn-pedido" onclick="enviarWhatsApp()"
+            class="btn-grad px-6 py-2 rounded-xl font-bold text-sm shadow-lg transition">
+            Hacer Pedido <i class="fab fa-whatsapp ml-1 text-lg"></i>
+        </button>
+    </div>
+
+    <script src="productos.js"></script>
+    <script>
+        let cart = {};
+        let isClosed = false;
+
+        function checkHorario() {
+            if (!CONFIG.horarioApertura || !CONFIG.horarioCierre) return false;
+
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTime = currentHour + currentMinute / 60;
+
+            const [openH, openM] = CONFIG.horarioApertura.split(':').map(Number);
+            const openTime = openH + openM / 60;
+
+            const [closeH, closeM] = CONFIG.horarioCierre.split(':').map(Number);
+            const closeTime = closeH + closeM / 60;
+
+            let closed = true;
+            if (openTime <= closeTime) {
+                if (currentTime >= openTime && currentTime <= closeTime) closed = false;
+            } else {
+                // Horario cruzado por la medianoche ej: 19:00 a 02:00
+                if (currentTime >= openTime || currentTime <= closeTime) closed = false;
+            }
+            return closed;
+        }
+
+        function init() {
+            document.getElementById('pizzeria-nombre').innerText = CONFIG.nombrePizzeria;
+
+            isClosed = checkHorario();
+            if (isClosed) {
+                document.getElementById('banner-cerrado').classList.remove('hidden');
+            }
+
+            renderItems(productos);
+        }
+
+        function renderItems(data) {
+            const grid = document.getElementById('grid-productos');
+            grid.innerHTML = data.map(p => `
+                <div class="card-pizza bg-white rounded-3xl p-3 shadow-sm border border-gray-100 flex gap-4 relative ${p.disponible === false ? 'opacity-60 grayscale' : ''}">
+                    ${p.esPromo && p.disponible !== false ? '<span class="absolute -top-2 -left-2 bg-yellow-400 text-yellow-900 text-[10px] font-black px-2 py-1 rounded-lg shadow-sm">PROMO</span>' : ''}
+                    ${p.disponible === false ? '<span class="absolute -top-2 -left-2 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-sm">AGOTADO</span>' : ''}
+                    <img src="${p.imagen}" class="w-24 h-24 rounded-2xl object-cover shadow-inner">
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-gray-800 leading-tight">${p.nombre}</h3>
+                            <p class="text-gray-400 text-xs mt-1 line-clamp-2">${p.descripcion}</p>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-lg font-800 text-slate-800">$${p.precio.toLocaleString()}</span>
+                            <div class="flex items-center gap-3">
+                                ${p.disponible === false ? `
+                                    <span class="text-xs font-bold text-red-500">Sin Stock</span>
+                                ` : (cart[p.id] ? `
+                                    <button onclick="changeQty(${p.id}, -1)" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">-</button>
+                                    <span class="font-bold">${cart[p.id]}</span>
+                                    <button onclick="changeQty(${p.id}, 1)" class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold">+</button>
+                                ` : `
+                                    <button onclick="changeQty(${p.id}, 1)" class="bg-slate-900 text-white px-4 py-1.5 rounded-xl text-xs font-bold">+ Agregar</button>
+                                `)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            updateCartBar();
+        }
+
+        function changeQty(id, delta) {
+            cart[id] = (cart[id] || 0) + delta;
+            if (cart[id] <= 0) delete cart[id];
+            renderItems(productos);
+        }
+
+        function updateCartBar() {
+            const bar = document.getElementById('cart-bar');
+            const total = Object.keys(cart).reduce((acc, id) => {
+                const p = productos.find(x => x.id == id);
+                return acc + (p.precio * cart[id]);
+            }, 0);
+
+            const count = Object.values(cart).reduce((a, b) => a + b, 0);
+
+            if (count > 0) {
+                bar.classList.remove('hidden');
+                document.getElementById('cart-total').innerText = `$${total.toLocaleString()}`;
+                document.getElementById('cart-count').innerText = count;
+
+                const btn = document.getElementById('btn-pedido');
+                if (isClosed) {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn.innerText = "Cerrado";
+                } else {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btn.innerHTML = `Hacer Pedido <i class="fab fa-whatsapp ml-1 text-lg"></i>`;
+                }
+            } else {
+                bar.classList.add('hidden');
+            }
+        }
+
+        function filtrar(cat) {
+            const filtered = cat === 'todas' ? productos : productos.filter(p => p.categoria === cat);
+            renderItems(filtered);
+            // Estilo de botones
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                b.classList.remove('bg-orange-600', 'text-white');
+                b.classList.add('bg-white', 'text-gray-500');
+            });
+            event.target.classList.add('bg-orange-600', 'text-white');
+        }
+
+        function enviarWhatsApp() {
+            if (isClosed) {
+                alert("La pizzería se encuentra cerrada en este momento. No podemos tomar pedidos.");
+                return;
+            }
+            let msg = `*Pedido para ${CONFIG.nombrePizzeria}*%0A--------------------------%0A`;
+            let total = 0;
+            Object.keys(cart).forEach(id => {
+                const p = productos.find(x => x.id == id);
+                msg += `• ${cart[id]}x ${p.nombre} ($${(p.precio * cart[id]).toLocaleString()})%0A`;
+                total += p.precio * cart[id];
+            });
+            msg += `--------------------------%0A*Total: $${total.toLocaleString()}*%0A%0A💳 *Pagar aquí:* ${CONFIG.linkMercadoPago}`;
+            window.open(`https://wa.me/${CONFIG.numeroWhatsApp}?text=${msg}`);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+
+</html>
