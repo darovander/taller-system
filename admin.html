@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración - Menú Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #fcfcfc;
+        }
+
+        .btn-grad {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+        }
+    </style>
+</head>
+
+<body class="pb-32 text-gray-800">
+
+    <div class="bg-slate-900 text-white p-6 shadow-md flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold">Panel de Control</h1>
+            <p class="text-sm text-gray-400">Edita la configuración y tus productos</p>
+        </div>
+        <a href="index.html"
+            class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-semibold transition">
+            <i class="fas fa-arrow-left mr-2"></i>Volver al Menú
+        </a>
+    </div>
+
+    <div class="max-w-4xl mx-auto p-4 md:p-8 space-y-8">
+
+        <!-- SECCIÓN: CONFIGURACIÓN -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h2 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-store text-orange-500 mr-2"></i>
+                Configuración General</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Nombre de Pizzería</label>
+                    <input type="text" id="cfg-nombre"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">WhatsApp (con código de país, ej:
+                        54911...)</label>
+                    <input type="text" id="cfg-whatsapp"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                </div>
+                <div class="md:col-span-2">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Link MercadoPago</label>
+                        <input type="text" id="cfg-mp"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Horario Apertura (ej.
+                            19:00)</label>
+                        <input type="time" id="cfg-apertura"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Horario Cierre (ej. 23:59)</label>
+                        <input type="time" id="cfg-cierre"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                    </div>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <button onclick="guardarConfig()"
+                        class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-lg text-sm font-bold transition">Guardar
+                        Configuración</button>
+                    <button onclick="exportarBackup()"
+                        class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition">
+                        <i class="fas fa-download mr-1"></i> Exportar Backup
+                    </button>
+                    <label
+                        class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition inline-flex items-center">
+                        <i class="fas fa-upload mr-1"></i> Importar Backup
+                        <input type="file" id="import-file" accept=".json" class="hidden"
+                            onchange="importarBackup(event)">
+                    </label>
+                </div>
+        </section>
+
+        <!-- SECCIÓN: PRODUCTOS -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h2 class="text-xl font-bold flex items-center"><i class="fas fa-pizza-slice text-orange-500 mr-2"></i>
+                    Productos</h2>
+                <button onclick="abrirModalProducto()"
+                    class="mt-4 md:mt-0 btn-grad text-white px-5 py-2 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition">
+                    <i class="fas fa-plus mr-1"></i> Nuevo Producto
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="p-3 text-sm font-semibold text-gray-600">ID</th>
+                            <th class="p-3 text-sm font-semibold text-gray-600">Imagen</th>
+                            <th class="p-3 text-sm font-semibold text-gray-600">Nombre</th>
+                            <th class="p-3 text-sm font-semibold text-gray-600">Categoría</th>
+                            <th class="p-3 text-sm font-semibold text-gray-600">Precio</th>
+                            <th class="p-3 text-sm font-semibold text-gray-600">Estado</th>
+                            <th class="p-3 text-sm font-semibold text-gray-600">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-productos" class="divide-y divide-gray-100">
+                        <!-- Llenado dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- MODAL PRODUCTO -->
+    <div id="modal-producto" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+                <h3 id="modal-titulo" class="text-lg font-bold">Agregar Producto</h3>
+                <button onclick="cerrarModal()" class="text-gray-400 hover:text-gray-600"><i
+                        class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="prod-id">
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Nombre</label>
+                    <input type="text" id="prod-nombre"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Descripción</label>
+                    <textarea id="prod-desc" rows="2"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Precio ($)</label>
+                        <input type="number" id="prod-precio"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-1">Categoría</label>
+                        <select id="prod-cat"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none bg-white">
+                            <option value="clasicas">Clásicas</option>
+                            <option value="promos">Promos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">URL Imagen o Cargar de PC</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="prod-img" placeholder="https://..."
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                        <input type="file" id="prod-file" accept="image/*" class="hidden"
+                            onchange="cargarImagenLocal(event)">
+                        <button type="button" onclick="document.getElementById('prod-file').click()"
+                            class="bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm font-semibold transition"
+                            title="Cargar desde PC">
+                            <i class="fas fa-upload"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center mt-2 gap-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="prod-promo"
+                            class="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500">
+                        <label for="prod-promo" class="ml-2 text-sm font-semibold text-gray-700">PROMOCIÓN</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="prod-disponible" checked
+                            class="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500">
+                        <label for="prod-disponible" class="ml-2 text-sm font-semibold text-gray-700">Disponible
+                            (Stock)</label>
+                    </div>
+                </div>
+
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
+                <button onclick="cerrarModal()"
+                    class="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700 transition">Cancelar</button>
+                <button onclick="guardarProducto()"
+                    class="btn-grad text-white px-6 py-2 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tostada Notificación -->
+    <div id="toast"
+        class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 z-50 flex items-center">
+        <i class="fas fa-check-circle mr-2"></i> <span id="toast-msg">Guardado correctamente</span>
+    </div>
+
+    <script src="productos.js"></script>
+    <script>
+        // Inicialización
+        window.onload = () => {
+            // Cargar datos en formulario de config
+            document.getElementById('cfg-nombre').value = CONFIG.nombrePizzeria || '';
+            document.getElementById('cfg-whatsapp').value = CONFIG.numeroWhatsApp || '';
+            document.getElementById('cfg-mp').value = CONFIG.linkMercadoPago || '';
+            document.getElementById('cfg-apertura').value = CONFIG.horarioApertura || '19:00';
+            document.getElementById('cfg-cierre').value = CONFIG.horarioCierre || '23:59';
+
+            renderTablaProductos();
+        };
+
+        // --- CONFIGURACIÓN ---
+        function guardarConfig() {
+            CONFIG.nombrePizzeria = document.getElementById('cfg-nombre').value;
+            CONFIG.numeroWhatsApp = document.getElementById('cfg-whatsapp').value;
+            CONFIG.linkMercadoPago = document.getElementById('cfg-mp').value;
+            CONFIG.horarioApertura = document.getElementById('cfg-apertura').value;
+            CONFIG.horarioCierre = document.getElementById('cfg-cierre').value;
+            saveConfig();
+            mostrarToast("Configuración guardada");
+        }
+
+        function exportarBackup() {
+            const dataStr = JSON.stringify({ config: CONFIG, productos: productos });
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+            const exportFileDefaultName = 'menu_backup.json';
+
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            mostrarToast("Backup exportado correctamente");
+        }
+
+        function importarBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.config && data.productos) {
+                        CONFIG = data.config;
+                        productos = data.productos;
+                        saveConfig();
+                        saveProductos();
+                        window.location.reload(); // Recargar para aplicar cambios en variables e inputs
+                    } else {
+                        alert("Archivo JSON no válido para este sistema.");
+                    }
+                } catch (err) {
+                    alert("Error leyendo el archivo.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- PRODUCTOS ---
+        function renderTablaProductos() {
+            const tbody = document.getElementById('lista-productos');
+            tbody.innerHTML = '';
+
+            productos.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition';
+
+                const trHtml = `
+                    <td class="p-3 text-sm text-gray-500">#${p.id}</td>
+                    <td class="p-3"><img src="${p.imagen}" class="w-12 h-12 object-cover rounded-lg shadow-sm"></td>
+                    <td class="p-3 font-semibold">${p.nombre} ${p.esPromo ? '<span class="ml-2 bg-yellow-100 text-yellow-800 text-[10px] px-2 py-0.5 rounded-full">PROMO</span>' : ''}</td>
+                    <td class="p-3 font-semibold text-slate-800">$${p.precio.toLocaleString()}</td>
+                    <td class="p-3">
+                        <span class="${p.disponible !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} text-xs px-2 py-1 rounded-full font-bold">
+                            ${p.disponible !== false ? 'Disponible' : 'Agotado'}
+                        </span>
+                    </td>
+                    <td class="p-3">
+                        <button onclick="abrirModalProducto(${p.id})" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded-md transition mr-2"><i class="fas fa-edit"></i></button>
+                        <button onclick="eliminarProducto(${p.id})" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-md transition"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tr.innerHTML = trHtml;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function abrirModalProducto(id = null) {
+            const tempId = document.getElementById('prod-id');
+            const titulo = document.getElementById('modal-titulo');
+
+            if (id) {
+                // Modo Edición
+                titulo.innerText = "Editar Producto";
+                const p = productos.find(x => x.id === id);
+                tempId.value = p.id;
+                document.getElementById('prod-nombre').value = p.nombre;
+                document.getElementById('prod-desc').value = p.descripcion;
+                document.getElementById('prod-precio').value = p.precio;
+                document.getElementById('prod-cat').value = p.categoria;
+                document.getElementById('prod-img').value = p.imagen;
+                document.getElementById('prod-promo').checked = p.esPromo;
+                document.getElementById('prod-disponible').checked = p.disponible !== false;
+            } else {
+                // Modo Creación
+                titulo.innerText = "Agregar Producto";
+                tempId.value = "";
+                document.getElementById('prod-nombre').value = "";
+                document.getElementById('prod-desc').value = "";
+                document.getElementById('prod-precio').value = "";
+                document.getElementById('prod-cat').value = "clasicas";
+                document.getElementById('prod-img').value = "";
+                document.getElementById('prod-promo').checked = false;
+                document.getElementById('prod-disponible').checked = true;
+            }
+
+            document.getElementById('modal-producto').classList.remove('hidden');
+            document.getElementById('modal-producto').classList.add('flex');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-producto').classList.add('hidden');
+            document.getElementById('modal-producto').classList.remove('flex');
+        }
+
+        function guardarProducto() {
+            const idVal = document.getElementById('prod-id').value;
+
+            const pData = {
+                nombre: document.getElementById('prod-nombre').value,
+                descripcion: document.getElementById('prod-desc').value,
+                precio: parseInt(document.getElementById('prod-precio').value) || 0,
+                categoria: document.getElementById('prod-cat').value,
+                imagen: document.getElementById('prod-img').value,
+                esPromo: document.getElementById('prod-promo').checked,
+                disponible: document.getElementById('prod-disponible').checked
+            };
+
+            if (pData.nombre.trim() === '') return alert("El nombre es requerido");
+
+            if (idVal) {
+                // Actualizar existente
+                const idx = productos.findIndex(x => x.id === parseInt(idVal));
+                pData.id = parseInt(idVal);
+                productos[idx] = pData;
+            } else {
+                // Crear nuevo
+                const newId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) + 1 : 1;
+                pData.id = newId;
+                productos.push(pData);
+            }
+
+            saveProductos();
+            renderTablaProductos();
+            cerrarModal();
+            mostrarToast(idVal ? "Producto actualizado" : "Producto creado");
+        }
+
+        function eliminarProducto(id) {
+            if (confirm("¿Estás seguro de eliminar este producto?")) {
+                productos = productos.filter(p => p.id !== id);
+                saveProductos();
+                renderTablaProductos();
+                mostrarToast("Producto eliminado");
+            }
+        }
+
+        function mostrarToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function cargarImagenLocal(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 500;
+                    const MAX_HEIGHT = 500;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    document.getElementById('prod-img').value = dataUrl;
+
+                    event.target.value = '';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+    </script>
+</body>
+
+</html>
